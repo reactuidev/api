@@ -1,12 +1,18 @@
+-- CreateEnum
+CREATE TYPE "UserRole" AS ENUM ('ADMIN', 'AGENCY', 'DEVELOPER');
+
 -- CreateTable
 CREATE TABLE "users" (
     "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "username" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "confirmationToken" TEXT,
     "confirmedAt" TIMESTAMP(3),
     "resetPasswordToken" TEXT,
     "resetPasswordSentAt" TIMESTAMP(3),
+    "role" "UserRole",
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -16,7 +22,6 @@ CREATE TABLE "users" (
 -- CreateTable
 CREATE TABLE "developers" (
     "id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "bio" TEXT NOT NULL,
     "avatar" TEXT,
@@ -34,7 +39,13 @@ CREATE TABLE "developers" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "users_username_key" ON "users"("username");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "developers_userId_key" ON "developers"("userId");
 
 -- AddForeignKey
 ALTER TABLE "developers" ADD CONSTRAINT "developers_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

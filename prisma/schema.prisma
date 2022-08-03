@@ -10,14 +10,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  ADMIN
+  AGENCY
+  DEVELOPER
+}
+
 model User {
   id                  String      @id @default(cuid())
+  name                String
+  username            String      @unique
   email               String      @unique
   password            String
   confirmationToken   String?
   confirmedAt         DateTime?
   resetPasswordToken  String?
   resetPasswordSentAt DateTime?
+  role                UserRole?
   createdAt           DateTime    @default(now())
   updatedAt           DateTime    @updatedAt
   Developer           Developer[]
@@ -27,7 +36,6 @@ model User {
 
 model Developer {
   id            String   @id @default(cuid())
-  name          String
   title         String
   bio           String   @db.Text
   avatar        String?
@@ -38,7 +46,7 @@ model Developer {
   linkedin      String?
   stackOverflow String?
   user          User     @relation(fields: [userId], references: [id])
-  userId        String
+  userId        String   @unique
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 

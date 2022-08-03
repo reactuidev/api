@@ -16,7 +16,7 @@ services:
     container_name: reactui_pgadmin
     links:
       - postgres:postgres
-    image: dpage/pgadmin4
+    image: dpage/pgadmin4:latest
     ports:
       - '8080:80'
     volumes:

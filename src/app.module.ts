@@ -1,8 +1,12 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
 import * as Joi from 'joi';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import * as path from 'path';
+import * as aws from '@aws-sdk/client-ses';
 
 @Module({
   imports: [
@@ -14,10 +18,37 @@ import * as Joi from 'joi';
         POSTGRES_PASSWORD: Joi.string().required(),
         POSTGRES_DB: Joi.string().required(),
         DATABASE_URL: Joi.string().required(),
+        AWS_REGION: Joi.string().required(),
+        AWS_ACCESS_KEY_ID: Joi.string().required(),
+        AWS_SECRET_ACCESS_KEY: Joi.string().required(),
       }),
     }),
+    MailerModule.forRootAsync({
+      inject: [ConfigService],
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        transport: {
+          SES: {
+            ses: new aws.SES({
+              region: configService.get('AWS_REGION'),
+            }),
+            aws,
+          },
+        },
+        defaults: { from: '"React UI" <no-reply@reactui.dev>' },
+        template: {
+          dir: path.join(process.cwd(), 'src/templates/'),
+          adapter: new HandlebarsAdapter(),
+          options: {
+            strict: true,
+          },
+        },
+      }),
+    }),
+    UserModule,
+    AuthModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}
